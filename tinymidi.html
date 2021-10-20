@@ -1,0 +1,87 @@
+
+<div id="myCanvas" style="text-align: center">
+<canvas id="canvas" width="500" height="500"></canvas>
+</div>		
+<button type="button" onClick="changeBackground(64)">change	</button>
+
+<style>
+canvas {
+  background-size: 100% 100%;
+  border: 1px solid red;
+}
+</style>
+
+<script>
+
+var midi, data;
+// start talking to MIDI controller
+if (navigator.requestMIDIAccess) {
+  navigator.requestMIDIAccess({
+    sysex: false
+  }).then(onMIDISuccess, onMIDIFailure);
+} else {
+  console.warn("No MIDI support in your browser")
+}
+
+// on success
+function onMIDISuccess(midiData) {
+  // this is all our MIDI data
+  midi = midiData;
+  var allInputs = midi.inputs.values();
+  // loop over all available inputs and listen for any MIDI input
+  for (var input = allInputs.next(); input && !input.done; input = allInputs.next()) {
+    // when a MIDI value is received call the onMIDIMessage function
+    input.value.onmidimessage = gotMIDImessage;
+  }
+}
+var dataList = document.querySelector('#midi-data ul')
+
+function gotMIDImessage(messageData) {
+  //var newItem = document.createElement('li');
+//newItem.appendChild(document.createTextNode(messageData.data));
+//dataList.appendChild(newItem);
+
+
+  var command = messageData.data[0];
+  var note = messageData.data[1];
+  var velocity = messageData.data[2];
+
+  switch (command) {
+    case 144: // noteOn
+      //document.querySelector('.note-info').textContent = 'Command: ' + command +
+        //' , Note: ' + note + ' , Velocity: ' + velocity;
+      changeBackground(note);
+      break;
+    }
+}
+
+// on failure
+function onMIDIFailure() {
+  console.warn("Not recognising MIDI controller")
+}
+
+
+
+function changeBackground(note) {
+    let imageUrl = "";
+    switch (note) {
+      case 60:
+        imageUrl = "url('https://static9.depositphotos.com/1594920/1087/i/600/depositphotos_10876003-stock-photo-crossbreed-siberian-cat-and-persian.jpg')";
+        break;
+      case 62:
+        imageUrl = "url('https://preview.pixlr.com/images/800wm/1402/2/1402100504.jpg')";
+        break;
+	  case 64:
+        imageUrl = "url('https://cdn.pixabay.com/photo/2017/06/01/07/31/elephant-2362696_960_720.png')";
+        break;
+      default:
+        imageUrl = ""
+        break;
+    }
+ document.getElementById("canvas").style.background = imageUrl;
+   document.getElementById("canvas").style.backgroundSize = "100% 100%"
+        
+  
+}
+
+</script>
